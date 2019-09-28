@@ -12,6 +12,7 @@
   (insta/parser
    "element = ws value ws
     value = object
+          | array
           | number
           | true
           | false
@@ -22,6 +23,7 @@
     member = ws string ws <':'> element
     <ws> = w+
     <w> = <''> | <'\t'> | <' '> | <'\r'> | <'\n'>
+    array = <'['> element (<','> element)* <']'>
     number = integer
     integer = posint
             | negint
@@ -69,12 +71,14 @@
 
 (defn transform-object [& members] (apply merge members))
 
+(defn transform-array [& elements] (vec elements))
 
 (def how-to-transform
   {:element transform-return-itself
    :value transform-return-itself
    :object transform-object
    :member transform-member
+   :array transform-array
    :number transform-number
    :integer transform-integer
    :posint transform-posint
@@ -116,5 +120,9 @@
 (parse "{     \"hoge\" : 1, \"fuga\" : -10}")
 
 (json "        " :start :ws)
+
+(json "[ 1 , 2, 3, 4]")
+
+(parse "[ 1 , 2, 3, 4]")
 
 "\u0021" ;; unicode
