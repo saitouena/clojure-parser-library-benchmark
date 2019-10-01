@@ -24,13 +24,16 @@
     <ws> = w+
     <w> = <''> | <'\t'> | <' '> | <'\r'> | <'\n'>
     array = <'['> element (<','> element)* <']'>
-    number = integer
-    integer = posint
-            | negint
-    posint = digit | onenine digit+
-    negint = <'-'> digit | <'-'> onenine digit+
+    number = integer fraction exponent
+    <integer> = posint
+              | negint
+    <posint> = digit | onenine digit+
+    <negint> = '-' digit | '-' onenine digit+
     <digit> = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
     <onenine> = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+    <fraction> = <''> | '.' digit+
+    <exponent> = <''> | 'E' sign digit+ | 'e' sign digit+
+    <sign> = <''> | '+' | '-'
     true = 'true'
     false = 'false'
     null = 'null'
@@ -65,7 +68,7 @@
 
 (defn transform-integer [& [n]] n)
 
-(defn transform-number [& [n]] n)
+(def transform-number (comp read-string str))
 
 (defn transform-member [& [key val]] {key val})
 
@@ -80,11 +83,6 @@
    :member transform-member
    :array transform-array
    :number transform-number
-   :integer transform-integer
-   :posint transform-posint
-   :negint transform-negint
-   :digit transform-digit
-   :onenine transform-onenine
    :true transform-true
    :false transform-false
    :null transform-null
@@ -126,3 +124,11 @@
 (parse "[ 1 , 2, 3, 4]")
 
 "\u0021" ;; unicode
+
+(parse "1e10")
+
+(parse "2.05E12")
+
+(parse "2.00e-20")
+
+(parse "2.001111e-0001")
